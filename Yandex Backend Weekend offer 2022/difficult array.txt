@@ -1,0 +1,76 @@
+/*
+Дан сложный массив. Внутри можем содержать в качестве элемента цифру или массив цифр. Может быть пустым или содержать один массив. Надо найти числа повторяющееся в одном массиве максимальное число раз. Если их несколько то выводить в порядке возрастания.
+*/
+
+#include <iostream>
+#include <map>
+#include <sstream>
+
+using namespace std;
+
+class Solution {
+public:
+    Solution(istream &is, ostream &os)
+    : input_(is)
+    , output_(os) {
+    }
+
+    void operator()() {
+        const auto [maxCount, numToCount] = startArray();
+
+        for (const auto [num, count] : numToCount) {
+            if (count == maxCount) {
+                output_ << num << ' ';
+            }
+        }
+    }
+
+private:
+    istream &input_;
+    ostream  &output_;
+
+    pair<size_t, map<int, size_t>> startArray() {
+        map<int, size_t> numToCount;
+        size_t maxCount = 0u;
+        string num;
+        for (auto c = input_.get(); input_.good() && c != char_traits<string::value_type>::eof();
+                c = input_.get()) {
+            switch (c) {
+                case '[': {
+                    const auto arr = startArray();
+                    maxCount = max(maxCount, arr.first);
+                    for (const auto [key, val] : arr.second) {
+                        numToCount[key] = val;
+                    }
+                    break;
+                }
+
+                case ']':
+                case ',':
+                    if (!num.empty()) {
+                        maxCount = max(maxCount, ++numToCount[stoi(num)]);
+                        num.clear();
+                    }
+                    break;
+
+                default:
+                    if (isdigit(c)) {
+                        num.push_back(c);
+                    }
+                    break;
+            }
+            if (c == ']') {
+                break;
+            }
+        }
+
+        return make_pair(maxCount, numToCount);
+    }
+};
+
+int main() {
+    stringstream input{"[1, [5, 5, 5, 5], 1, 1]"};
+    Solution{cin, cout}();
+    cout.flush();
+    return 0;
+}
