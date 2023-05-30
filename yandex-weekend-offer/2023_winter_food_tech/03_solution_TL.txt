@@ -1,0 +1,98 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <numeric>
+#include <utility>
+
+using namespace std;
+
+class Solution final {
+public:
+    Solution(istream &is, ostream &os)
+    : os_(os)
+    , is_(is)
+    , mid_(0u)
+    , temps_() {
+    }
+
+    void operator()() {
+        init();
+        int n = 0;
+        is_ >> n;
+        const string_view yes = "yes";
+        const string_view no = "no";
+        for (int i = 0; i < n; ++i) {
+            const auto ad = readAdvertisement();
+            os_ << (checkAdvertisement(ad) ? yes : no) << '\n';
+        }
+        os_.flush();
+    }
+
+private:
+    struct Advertisement {
+        int tMin = 0;
+        int tMax = 0;
+        int dBegin = 0;
+        int dEnd = 0;
+    };
+
+    ostream &os_;
+    istream &is_;
+    int mid_;
+    vector<int> temps_;
+
+    void init() {
+        is_ >> mid_;
+        const size_t n = 2u * mid_ + 1u;
+        temps_.reserve(n);
+        for (size_t i = 0u; i < n; ++i) {
+            int temp = 0;
+            is_ >> temp;
+            temps_.push_back(temp);
+        }
+    }
+
+    bool checkAdvertisement(const Advertisement &ad) {
+        const auto mid = temps_.begin() + mid_;
+        const auto left = mid + ad.dBegin;
+        const auto right = mid + ad.dEnd + 1; // '+1' to make end()
+        const auto [minTemp, maxTemp] = std::minmax_element(left, right);
+        return InRange(*minTemp, ad.tMin, ad.tMax) || InRange(*maxTemp, ad.tMin, ad.tMax) ||
+                InRange(ad.tMin, *minTemp, *maxTemp) || InRange(ad.tMax, *minTemp, *maxTemp);
+    }
+
+    Advertisement readAdvertisement() {
+        Advertisement ad = {};
+        is_ >> ad.tMin;
+        is_ >> ad.tMax;
+        is_ >> ad.dBegin;
+        is_ >> ad.dEnd;
+        return ad;
+    }
+
+    bool InRange(int value, int lower, int upper) {
+        return (lower <= value) && (value <= upper);
+    }
+};
+
+int main() {
+//    istringstream input{R"(2
+//2 4 5 -2 2
+//4
+//-1 -1 -1 1
+//0 10 -1 0
+//6 8 -2 2
+//3 3 -1 0
+//)"};
+    Solution{cin, cout}();
+    return 0;
+}

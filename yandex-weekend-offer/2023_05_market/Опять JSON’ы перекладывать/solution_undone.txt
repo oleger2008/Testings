@@ -1,0 +1,79 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+#include "json.hpp"
+
+// for convenience
+using json = nlohmann::json;
+
+struct Key {
+    Key() = delete;
+    constexpr static std::string_view OFFERS{"offers"};
+    constexpr static std::string_view OFFER_ID{"offer_id"};
+    constexpr static std::string_view MARKET_SKU{"market_sku"};
+    constexpr static std::string_view PRICE{"price"};
+};
+
+struct Offer {
+    std::string offer_id;
+    int market_sku;
+    int price;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Offer, offer_id, market_sku, price);
+
+Offer loadOffer(const json::object_t &obj) {
+
+}
+
+std::vector<Offer> loadOffers(const json::array_t &arr_obj) {
+    std::vector<Offer> result;
+    result.reserve(arr_obj.size());
+
+    for (const auto &arr_value: arr_obj) {
+        result.emplace_back(loadOffer(arr_value));
+    }
+    return result;
+}
+
+void solution(std::istream &input, std::ostream &output) {
+    int n = 0;
+    input >> n;
+
+    for (int i = 0; i < n; ++i) {
+        json obj;
+        input >> obj;
+        auto offers = loadOffers(obj.at(Key::OFFERS))
+    }
+
+    output.flush();
+}
+
+int main() {
+/*    std::stringstream input{R"(5 1 2
+1 1 5
+1 2 3
+2 2 1
+3 1 2
+4 1 3
+
+)"};*/
+    solution(std::cin, std::cout);
+
+    return 0;
+}

@@ -1,0 +1,86 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+
+using namespace std;
+
+const unordered_map<int, char> SIGNS = {{10, 'A'}, {11, 'B'}, {12, 'C'}, {13, 'D'}, {14, 'E'}, {15, 'F'}};
+
+void incode(istream &is, ostream &os) {
+    const int surname_first_char = is.peek() - 'A' + 1;
+
+    unordered_set<int> unique_chars;
+    for (int i = 0; i < 3; ++i) {
+        int c = is.get();
+        while (c != ',') {
+            unique_chars.insert(c);
+            c = is.get();
+        }
+    }
+    int sum = 0;
+    for (int i = 0; i < 2; ++i) {
+        int num = is.get();
+        while (num != ',') {
+            sum += num - '0';
+            num = is.get();
+        }
+    }
+    {
+        string l;
+        getline(is, l);
+    }
+
+    int code = (unique_chars.size() + 64 * sum + 256 * surname_first_char);
+    const int base = 16;
+    string result;
+    while (code != 0) {
+        int digit = code % base;
+        if (SIGNS.contains(digit)) {
+            result.push_back(SIGNS.at(digit));
+        } else {
+            result.push_back('0' + digit);
+        }
+        if (result.size() == 3) {
+            break;
+        }
+        code /= base;
+    }
+    reverse(begin(result), end(result));
+    os << result << ' ';
+}
+
+void solution(istream &is, ostream &os) {
+    size_t n = 0;
+    is >> n;
+
+    is.get();
+    for (size_t i = 0; i < n; ++i) {
+        incode(is, os);
+    }
+}
+
+int main() {
+//    stringstream input{R"(2
+//Volozh,Arcady,Yurievich,11,2,1964
+//Segalovich,Ilya,Valentinovich,13,9,1964
+//
+//)"};
+    solution(cin, cout);
+
+    return 0;
+}

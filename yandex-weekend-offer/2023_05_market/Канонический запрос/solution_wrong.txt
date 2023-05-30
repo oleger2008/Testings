@@ -1,0 +1,128 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+
+using namespace std;
+
+constexpr std::string_view IN = " in ";
+constexpr std::string_view DOTS = "...";
+constexpr char OPEN_BRACKET = '(';
+constexpr char CLOSE_BRACKET = ')';
+constexpr char QUOTE = '\"';
+constexpr char QUESTION_MARK = '?';
+constexpr char SPACE = ' ';
+
+void skipUntil(std::istream &input, const char to_find) {
+    char c = static_cast<char>(input.get());
+    bool in_quote = false;
+    while (in_quote || (c != to_find)) {
+        if (c == QUOTE) {
+            in_quote = !in_quote;
+        }
+        c = static_cast<char>(input.get());
+//        if (!input.good()) {
+//            break;
+//        }
+    }
+//    return c;
+}
+
+char my_tolower(const char ch) {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+}
+
+size_t countSpaces(const std::string &str) {
+    size_t result = 0u;
+    for (auto iter = str.rbegin(); iter != str.rend(); ++iter) {
+        if (isspace(*iter)) {
+            ++result;
+        } else {
+            break;
+        }
+    }
+    return result;
+}
+
+void solution(std::istream &input, std::ostream &output) {
+    std::string result;
+    for (char c = static_cast<char>(input.get()); input.good(); c = static_cast<char>(input.get())) {
+        if (isspace(c)) {
+            if (result.empty()) {
+                continue;
+            }
+            if (result.back() == OPEN_BRACKET) {
+                if (c == '\n' || c == '\r') {
+                    (void) input.get();
+                } else {
+                    // do nothing
+                }
+                continue;
+            }
+            if (isspace(result.back())) {
+                continue;
+            }
+            result.push_back(SPACE);
+        } else if (c == OPEN_BRACKET) {
+            if (result.empty()) {
+                result.push_back(c);
+                continue;
+            }
+            if ((result.size() < IN.size()) && (result != "in ")) {
+                continue;
+            }
+            const auto str = result.substr(result.size() - IN.size());
+            result.push_back(c);
+            if (str == IN) {
+                result += DOTS;
+                skipUntil(input, CLOSE_BRACKET);
+                result.push_back(CLOSE_BRACKET);
+            }
+        } else if (c == QUOTE) {
+            result.push_back(QUESTION_MARK);
+            skipUntil(input, QUOTE);
+        } else if (c == CLOSE_BRACKET) {
+            if (result.back() == SPACE) {
+                result.back() = CLOSE_BRACKET;
+            } else {
+                result.push_back(CLOSE_BRACKET);
+            }
+        } else {
+            result.push_back(my_tolower(c));
+        }
+    }
+
+    result.resize(result.size() - countSpaces(result));
+    output << result;
+    output.flush();
+}
+
+int main() {
+    std::stringstream input{R"input(select t.id
+from topics t
+inner join readers r
+on r.t_id = t.id
+where (
+ifnull( t.ref, "n" ) = "a"
+or t.name = "messages"
+or t.name like "%'"
+);
+)input"};
+    solution(input, std::cout);
+
+    return 0;
+}

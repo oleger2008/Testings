@@ -1,0 +1,58 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+struct Size {
+    int w;
+    int h;
+};
+
+Size ParseLine(string &&line) {
+    const auto separator = line.find('x');
+    const string first = line.substr(0, separator);
+    const string second = line.substr(separator + 1);
+    return {stoi(first), stoi(second)};
+}
+
+Size Scale(const Size size, const int width) {
+    return {width, static_cast<int>(ceil(1. * size.h * width / size.w))};
+}
+
+int main() {
+    int etalon_width = 0;
+    int n = 0;
+    int foto_count = 0;
+    cin >> etalon_width >> n >> foto_count;
+    cin.get();
+
+    vector<int> heights;
+    while (n > 0) {
+        string line;
+        getline(cin, line);
+        const auto foto = Scale(ParseLine(std::move(line)), etalon_width);
+        heights.push_back(foto.h);
+        --n;
+    }
+
+    sort(heights.begin(), heights.end());
+    cout << accumulate(heights.begin(), heights.begin() + foto_count, 0) << endl;
+    cout << accumulate(heights.rbegin(), heights.rbegin() + foto_count, 0) << endl;
+
+    return 0;
+}

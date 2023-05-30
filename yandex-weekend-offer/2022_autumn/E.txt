@@ -1,0 +1,122 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+
+using namespace std;
+
+struct Ingredients {
+    static Ingredients First() {
+        Ingredients first;
+        first.exist = true;
+        first.first = 1;
+        return first;
+    }
+    
+    static Ingredients Second() {
+        Ingredients second;
+        second.exist = true;
+        second.second = 1;
+        return second;
+    }
+    
+    bool exist = false;
+    int first = 0;
+    int second = 0;
+    vector<int> other;
+};
+
+using Recipes = vector<Ingredients>;
+
+Ingredients readRecipe(istream &is) {
+    int n = 0;
+    is >> n;
+    Ingredients result;
+    while (n > 0) {
+        int ingredient = 0;
+        is >> ingredient;
+        if (ingredient == 1) {
+            ++result.first;
+        } else if (ingredient == 2) {
+            ++result.second;
+        } else {
+            result.other.push_back(ingredient);
+        }
+        --n;
+    }
+    return result;
+}
+
+Recipes readRecipes(istream &is, const size_t n) {
+    Recipes recipes;
+    recipes.reserve(n);
+    recipes.push_back(Ingredients::First()); // A
+    recipes.push_back(Ingredients::Second()); // B
+    for (size_t i = 0; i + 2 < n; ++i) {
+        recipes.emplace_back(std::move(readRecipe(is)));
+    }
+    return recipes;
+}
+
+bool hasCycle(const Recipes &recipes, const vector<int> &other) {
+    int slow = other.front() - 1;
+    int fast = other.front() - 1;
+    while (slow != fast) {
+    }
+}
+
+void relaxRecipes(Recipes &recipes) {
+    for (auto iter = recipes.begin() + 2; iter != recipes.end(); ++iter) {
+        stack<int> stck;
+        for (auto idx : iter->other) {
+            if (idx == 1) {
+                ++iter->first;
+            } else if (idx == 2) {
+                ++iter->second;
+            } else {
+                stck.push(idx);
+            }
+        }
+        while (!stck.empty()) {
+            int idx = stck.top();
+            stck.pop();
+            
+        }
+        
+    }
+}
+
+void solution(istream &is, ostream &os) {
+    size_t n = 0;
+    is >> n;
+
+    Recipes recipes = readRecipes(is, n);
+    relaxRecipes(recipes);
+}
+
+int main() {
+    stringstream input{R"(5 1 2
+1 1 5
+1 2 3
+2 2 1
+3 1 2
+4 1 3
+)"};
+    solution(input, cout);
+
+    return 0;
+}

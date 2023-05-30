@@ -1,0 +1,58 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+
+using namespace std;
+
+
+int main() {
+    int n = 0;
+    cin >> n;
+
+    const int size = 2 * n + 1;
+    vector<vector<int> > m(size, vector<int>(size, 0));
+
+    // сначала нули
+    for (size_t i = 0; i < size; ++i) {
+        m[i][i] = 0;
+    }
+
+    int positive = 1;
+    int negative = -1;
+    for (size_t row = 0; row < size; ++row) {
+        for (size_t col = 0; col < size; ++col) {
+            if (row == col) {
+                m[row][col] = 0;
+                continue;
+            }
+            if ((row * size + col) & 1) {
+                m[row][col] = positive++;
+            } else {
+                m[col][row] = negative--;
+            }
+
+        }
+    }
+
+    for (size_t row = 0; row < size; ++row) {
+        for (size_t col = 0; col < size; ++col) {
+            cout << m[row][col] << ' ';
+        }
+        cout << '\n';
+    }
+
+    return 0;
+}

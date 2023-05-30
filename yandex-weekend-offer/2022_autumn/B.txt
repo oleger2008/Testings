@@ -1,0 +1,85 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+#include <chrono>
+
+using namespace std;
+
+struct LogInfo {
+    std::chrono::minutes dur;
+    char type = 0;
+};
+
+using Logs = vector<LogInfo>;
+
+void solution(istream &is, ostream &os) {
+    using chrono::duration_cast;
+    using chrono::days;
+    using chrono::hours;
+    using chrono::minutes;
+
+    size_t n = 0;
+    is >> n;
+
+    map<int, Logs> rocket_to_logs;
+    for (size_t i = 0; i < n; ++i) {
+        int d = 0;
+        int h = 0;
+        int m = 0;
+        int id = 0;
+        char type = 0;
+        is >> d >> h >> m >> id >> type;
+        const minutes dur = days{d} + hours{h} + minutes{m};
+        rocket_to_logs[id].push_back({dur, type});
+    }
+
+    for (auto &[_, logs] : rocket_to_logs) {
+        sort(begin(logs), end(logs),
+             [](const auto &lhs, const auto &rhs) {
+                 return lhs.dur < rhs.dur;
+             }
+        );
+
+        minutes total_time_min{0};
+        for (auto cur_log = begin(logs) + 1; cur_log != end(logs); ++cur_log) {
+            if (cur_log->type == 'A') {
+                continue;
+            }
+            auto prev_log = prev(cur_log);
+            total_time_min += (cur_log->dur - prev_log->dur);
+        }
+        os << total_time_min.count() << ' ';
+    }
+}
+
+int main() {
+//    stringstream input{R"(8
+//50 7 25 3632 A
+//14 23 52 212372 S
+//15 0 5 3632 C
+//14 21 30 212372 A
+//50 7 26 3632 C
+//14 21 30 3632 A
+//14 21 40 212372 B
+//14 23 52 3632 B
+//
+//)"};
+    solution(cin, cout);
+
+    return 0;
+}

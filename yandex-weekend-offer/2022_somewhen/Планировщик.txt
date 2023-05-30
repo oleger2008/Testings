@@ -1,0 +1,137 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+
+using namespace std;
+
+struct Executor {
+    bool is_free = true;
+    int time_till_free = 0;
+
+    void tick() {
+        if (is_free) {
+            return;
+        }
+        --time_till_free;
+        is_free = (time_till_free == 0);
+    }
+
+    void makeBusy(int task) {
+        time_till_free = task;
+        is_free = false;
+    }
+};
+
+struct Task {
+    int id = 0;
+    int time = 0;
+};
+
+struct Queue {
+    int time_no_take = 0;
+    queue<Task> tasks;
+
+    [[nodiscard]] bool empty() const {
+        return tasks.empty();
+    }
+
+    void addTask(const Task task) {
+        tasks.push(task);
+    }
+
+    void tick() {
+        ++time_no_take;
+    }
+
+    Task getTask() {
+        if (tasks.empty()) {
+            throw std::runtime_error("try to get from empty queue");
+        }
+        Task task = tasks.front();
+        tasks.pop();
+        time_no_take = 0;
+        return task;
+    }
+};
+
+void solution(istream &input, ostream &output) {
+    int n = 0;
+    int exe_count = 0;
+    int q_count = 0;
+    input >> n >> exe_count >> q_count;
+
+    vector<Executor> executors(exe_count);
+    vector<Queue> queues(q_count);
+
+
+    for (int i = 0; i < n; ++i) {
+        int second = 0;
+        int q_id = 0;
+        int time = 0;
+        input >> second >> q_id >> time;
+
+        queues[q_id - 1].addTask({i, time});
+    }
+
+    vector<pair<int, int>> result(n);
+    bool isDone = false;
+    for (int cur_time = 1; !isDone; ++cur_time) {
+        isDone = true;
+        for (size_t i = 0u; i < executors.size(); ++i) {
+            executors[i].tick();
+            if (executors[i].is_free) {
+                const auto q = max_element(begin(queues), end(queues),
+                        [](const auto &lhs, const auto &rhs) {
+                                return lhs.time_no_take < rhs.time_no_take;
+                        });
+                if (q == end(queues)) {
+                    throw std::runtime_error("empty queues!");
+                }
+                if (!q->empty()) {
+                    const auto task = q->getTask();
+                    result[task.id] = {i + 1, cur_time};
+                    executors[i].makeBusy(task.time);
+                }
+            }
+        }
+
+        for (auto &q : queues) {
+            q.tick();
+            isDone &= q.empty();
+        }
+    }
+
+    for (const auto r : result) {
+        output << r.first << ' ' << r.second << '\n';
+    }
+    output.flush();
+}
+
+int main() {
+    stringstream input{R"(5 1 2
+1 1 5
+1 2 3
+2 2 1
+3 1 2
+4 1 3
+
+)"};
+    solution(input, cout);
+
+    return 0;
+}

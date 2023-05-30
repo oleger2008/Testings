@@ -1,0 +1,44 @@
+#include <iostream>
+
+using namespace std;
+
+bool IsLower(const int value, const int first, const int second) {
+    return (value < first) && (value < second);
+}
+
+bool IsBigger(const int value, const int first, const int second) {
+    return (value > first) && (value > second);
+}
+
+bool IsLowerOrBigger(const int value, const int first, const int second) {
+    return IsBigger(value, first, second) || IsLower(value, first, second);
+}
+
+void CheckWitch(int toCheck, const int first, const int second) {
+    int delta = 0;
+    if (IsLowerOrBigger(toCheck, first, second)) {
+        const int first_delta = first - toCheck;
+        const int second_delta = second - toCheck;
+        if (abs(first_delta) < abs(second_delta)) {
+            delta = abs(first_delta);
+            toCheck += first_delta;
+        } else {
+            delta = abs(second_delta);
+            toCheck += second_delta;
+        }
+    }
+    int victims_count = IsLowerOrBigger(first, toCheck, second) +
+                        IsLowerOrBigger(second, toCheck, first);
+    cout << delta << ' ' << victims_count << endl;
+}
+
+int main() {
+    int first, second, third;
+    cin >> first >> second >> third;
+
+    CheckWitch(first, second, third);
+    CheckWitch(second, first, third);
+    CheckWitch(third, first, second);
+
+    return 0;
+}

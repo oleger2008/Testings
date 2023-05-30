@@ -1,0 +1,139 @@
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <vector>
+#include <array>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <utility>
+#include <algorithm>
+#include <deque>
+#include <cmath>
+
+using namespace std;
+
+struct Order {
+    int start = 0;
+    int end = 0;
+    int cost = 0;
+};
+
+using Orders = vector<Order>;
+
+struct Query {
+    int start = 0;
+    int end = 0;
+    size_t idx = 0u;
+};
+
+using Queries = vector<Query>;
+
+Orders readOrders(istream &is, const size_t n) {
+    Orders result;
+    for (size_t i = 0; i < n; ++i) {
+        int start = 0;
+        int end = 0;
+        int cost = 0;
+        is >> start >> end >> cost;
+        result.push_back({start, end, cost});
+    }
+    return result;
+}
+
+void solution(istream &is, ostream &os) {
+    size_t n = 0;
+    is >> n;
+
+    Orders orders = readOrders(is, n);
+    Queries cost_queries;
+    Queries dur_queries;
+    is >> n;
+    cost_queries.reserve(n);
+    dur_queries.reserve(n);
+    for (size_t i = 0; i < n; ++i) {
+        int start = 0;
+        int end = 0;
+        int type = 0;
+        is >> start >> end >> type;
+        if (type == 1) {
+            cost_queries.push_back({start, end, i});
+        } else {
+            dur_queries.push_back({start, end, i});
+        }
+    }
+
+    vector<int64_t> results(cost_queries.size() + dur_queries.size());
+
+    sort(begin(orders), end(orders), [](const auto &lhs, const auto &rhs) {
+        return lhs.start < rhs.start;
+    });
+    vector<int64_t> prefix_sum_for_cost(orders.size() + 1, 0);
+    for (size_t i = 1; i < prefix_sum_for_cost.size(); ++i) {
+        prefix_sum_for_cost[i] = prefix_sum_for_cost[i - 1] + orders[i - 1].cost;
+    }
+    for (const auto q : cost_queries) {
+        auto left_bound = lower_bound(begin(orders), end(orders), q.start,
+                                      [](const auto &elem, int start) {
+                                          return elem.start < start;
+                                      }
+        );
+        if (left_bound == end(orders)) {
+            continue;
+        }
+        auto right_bound = upper_bound(begin(orders), end(orders), q.end,
+                                       [](int end, const auto &elem) {
+                                           return end < elem.start;
+                                       }
+        );
+        results[q.idx] = prefix_sum_for_cost[right_bound - begin(orders)] -
+                prefix_sum_for_cost[left_bound - begin(orders)];
+    }
+
+    sort(begin(orders), end(orders), [](const auto &lhs, const auto &rhs) {
+        return lhs.end < rhs.end;
+    });
+    vector<int64_t> prefix_sum_for_dur(orders.size() + 1, 0);
+    for (size_t i = 1; i < prefix_sum_for_dur.size(); ++i) {
+        prefix_sum_for_dur[i] = prefix_sum_for_dur[i - 1] +
+                (orders[i - 1].end - orders[i - 1].start);
+    }
+    for (const auto q : dur_queries) {
+        auto left_bound = lower_bound(begin(orders), end(orders), q.start,
+                                      [](const auto &elem, int start) {
+                                          return elem.end < start;
+                                      }
+        );
+        if (left_bound == end(orders)) {
+            continue;
+        }
+        auto right_bound = upper_bound(begin(orders), end(orders), q.end,
+                                       [](int end, const auto &elem) {
+                                           return end < elem.end;
+                                       }
+        );
+        results[q.idx] = prefix_sum_for_dur[right_bound - begin(orders)] -
+                prefix_sum_for_dur[left_bound - begin(orders)];
+    }
+
+    for (const auto r : results) {
+        os << r << ' ';
+    }
+}
+
+int main() {
+//    stringstream input{R"(2
+//Volozh,Arcady,Yurievich,11,2,1964
+//Segalovich,Ilya,Valentinovich,13,9,1964
+//
+//)"};
+    solution(cin, cout);
+
+    return 0;
+}
