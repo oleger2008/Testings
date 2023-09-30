@@ -1,0 +1,105 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <queue>
+#include <stack>
+#include <algorithm>
+#include <numeric>
+#include <utility>
+
+using namespace std;
+
+class Solution final {
+public:
+    Solution(istream &is, ostream &os)
+    : os_(os)
+    , is_(is)
+    , numToCount_() {
+    }
+
+    void operator()() {
+        init();
+        vector<pair<int, int>> countToNum;
+        for (const auto [num, count] : numToCount_) {
+            countToNum.emplace_back(count, num);
+        }
+        sort(begin(countToNum), end(countToNum),
+             [](const auto lhs, const auto rhs) {
+            return lhs.first > rhs.first;
+        });
+        const int mostCount = countToNum.front().first;
+        vector<int> result;
+        for (const auto [count, num] : countToNum) {
+            if (count != mostCount) {
+                break;
+            }
+            result.push_back(num);
+        }
+        sort(begin(result), end(result));
+        for (const auto num : result) {
+            os_ << num << ' ';
+        }
+        os_.flush();
+    }
+
+private:
+    static const char OPEN_BRACKET = '[';
+    static const char CLOSE_BRACKET = ']';
+    static const char COMMA = ',';
+    static const char MINUS = '-';
+
+    ostream &os_;
+    istream &is_;
+    unordered_map<int, int> numToCount_;
+
+    void init() {
+        char c = 0;
+        while (is_ >> c) {
+            switch (c) {
+                case OPEN_BRACKET: {
+                    const char next = is_.peek();
+                    if ((next == OPEN_BRACKET) || (next == CLOSE_BRACKET)) {
+                        continue;
+                    }
+                    ++numToCount_[parseNum()];
+                    break;
+                }
+                case ',':
+                case ']':
+                    break;
+                default:
+                    if (isdigit(c) || (c == MINUS)) {
+                        is_.putback(c);
+                        ++numToCount_[parseNum()];
+                    }
+                    break;
+            }
+        }
+    }
+
+    int parseNum() {
+        string numStr;
+        char c = 0;
+        is_ >> c;
+        while ((c != COMMA) && (c != CLOSE_BRACKET)) {
+            numStr.push_back(c);
+            is_ >> c;
+        }
+        return stoi(numStr); // hope no exception
+    }
+};
+
+int main() {
+//    istringstream input("[1, 2, 3, [5, 5], [6, 6], [7, 8, 9, [10, 11]]]");
+//    istringstream input("[[[[[[1]]]], []]]");
+//    istringstream input("[5, 5, 1, 3, 1, 2]");
+//    istringstream input("[0, 10, 2, 5, -999999999]");
+    Solution{cin, cout}();
+    return 0;
+}

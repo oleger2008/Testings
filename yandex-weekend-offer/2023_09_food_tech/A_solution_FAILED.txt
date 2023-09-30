@@ -1,0 +1,75 @@
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <string_view>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <algorithm>
+#include <utility>
+#include <numeric>
+#include <cmath>
+
+using namespace std;
+
+void readArray(istream &in, vector<double> &v) {
+    for (auto &i : v) {
+        int x = 0;
+        int y = 0;
+        in >> x >> y;
+        i = std::sqrt(0. + x * x + y * y);
+    }
+}
+
+bool inRange(double range, double value) {
+    return value < range;
+}
+
+void printResult(ostream &out, vector<double> &v, double range, int winner) {
+    out << winner << endl;
+    int count = 0;
+    for (auto i : v) {
+        if (i >= range) break;
+        ++count;
+    }
+    out << count;
+}
+
+void solution(istream &in, ostream &out) {
+    int p = 0, q = 0;
+    in >> p >> q;
+    vector<double> first(8, 0.);
+    auto second = first;
+    readArray(in, first);
+    readArray(in, second);
+    sort(std::begin(first), std::end(first));
+    sort(std::begin(second), std::end(second));
+
+    const auto range = static_cast<double>(p + q);
+    if (!inRange(range, first.front()) && !inRange(range, second.front())) {
+        out << "0\n0";
+        return;
+    }
+
+    if (std::abs(first.front() - second.front()) < 0.000000001) {
+        out << "0\n0";
+        return;
+    }
+
+    if (first.front() < second.front()) {
+        printResult(out, first, std::min(range, second.front()), 1);
+    } else {
+        printResult(out, second, std::min(range, first.front()), 2);
+    }
+}
+
+int main() {
+    solution(cin, cout);
+    return 0;
+}

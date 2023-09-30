@@ -1,0 +1,57 @@
+https://leetcode.com/problems/candy/solutions/4037646/99-20-greedy-two-one-pass/
+
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <string_view>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <algorithm>
+#include <utility>
+#include <numeric>
+
+using namespace std;
+
+void readArray(istream &in, vector<int> &v) {
+    for (int i = 0; i < v.capacity(); ++i) {
+        int value = 0;
+        in >> value;
+        v.push_back(value);
+    }
+}
+
+void solution(istream &in, ostream &out) {
+    int n = 0;
+    in >> n;
+    vector<int> ratings; ratings.reserve(n);
+    readArray(in, ratings);
+
+    vector<int> bonuses(n, 1);
+    for (int i = 1; i < n; ++i) {
+        if (ratings[i] > ratings[i - 1]) {
+            bonuses[i] = bonuses[i - 1] + 1;
+        }
+    }
+
+    for (int i = n - 2; i >= 0; --i) {
+        if (ratings[i] > ratings[i + 1]) {
+            bonuses[i] = std::max(bonuses[i], bonuses[i + 1] + 1);
+        }
+    }
+
+    int result = accumulate(std::begin(bonuses), std::end(bonuses), 0);
+    result *= 500;
+    out << result;
+}
+
+int main() {
+    solution(cin, cout);
+    return 0;
+}
