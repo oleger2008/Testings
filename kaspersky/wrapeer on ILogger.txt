@@ -1,0 +1,56 @@
+Имеется интерфейс ILogger:
+struct ILogger
+{
+    virtual ~ILogger() = default;
+    virtual void Log(const std::string_view& message) = 0;
+};
+ 
+ILogger* CreateLogger();
+void     DestroyLogge();
+
+для которого имеется реализация (фабричный метод CreateLogger), 
+которая оказалась плохой – вызов метода ILogger::Log тормозной.
+
+Необходимо написать класс-враппер над имеющейся реализацией, 
+который бы устранял, насколько это возможно, тормознутость вызова ILogger::Log.
+
+Пример использования ILogger:
+
+void foo(ILogger* logger)
+{
+     logger->Log("foo: Enter");
+     bar(logger);
+     logger->Log("foo: Exit");
+}
+
+class LoggerWrapper : public ILogger {
+public:
+    ~LoggerWrapper() override = default; // todo
+    
+    void Log(const std::string_view& message) override {
+        std::lock_guard(mutex_);
+        storage_.push(std::string(message));
+    }
+    
+    void Flush() {
+        std::queue<std::string> stg;
+        {
+            std::lock_guard(mutex_);
+            std::swap(stg, storage_);
+        }
+        while (!stg.empty()) {
+            std::string msg = stg.top();
+            stg.pop();
+            loger_.Log(msg);
+        }
+    }
+
+private:
+    std::mutex mutex_;
+    std::queue<std::string> storage_;
+    ILogger& loger_;
+}
+
+void main2(LoggerWrapper &log_wrapper) {
+    log_wrapper.Flush();
+}
